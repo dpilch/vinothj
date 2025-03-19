@@ -68,6 +68,6 @@ demoDS.createResolver("EchoQueryResolver", {
   fieldName: "echo",
   runtime: appsync.FunctionRuntime.JS_1_0_0,
   code: appsync.Code.fromAsset(
-    path.join(__dirname, "data/resolvers/myFunction.js")
+    path.join(__dirname, "data/resolvers/myFunctionTwo.js")
   ),
 });
