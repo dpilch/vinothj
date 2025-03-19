@@ -3,8 +3,8 @@ import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import * as path from "path";
-import * as url from "url";
+import * as path from "node:path";
+import * as url from "node:url";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
