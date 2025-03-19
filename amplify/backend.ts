@@ -4,11 +4,10 @@ import { data } from "./data/resource";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import * as url from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
