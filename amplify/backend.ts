@@ -1,11 +1,65 @@
-import { defineBackend } from '@aws-amplify/backend';
-import { auth } from './auth/resource';
-import { data } from './data/resource';
+import { defineBackend } from "@aws-amplify/backend";
+import { auth } from "./auth/resource";
+import { data } from "./data/resource";
+import * as appsync from "aws-cdk-lib/aws-appsync";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
  */
-defineBackend({
+const backend = defineBackend({
   auth,
   data,
+});
+
+const api = new appsync.GraphqlApi(backend.stack, "Api", {
+  name: "demo",
+  definition: appsync.Definition.fromFile(
+    path.join(__dirname, "schema.graphql")
+  ),
+  authorizationConfig: {
+    defaultAuthorization: {
+      authorizationType: appsync.AuthorizationType.IAM,
+    },
+  },
+  xrayEnabled: true,
+});
+
+const demoTable = new dynamodb.Table(backend.stack, "DemoTable", {
+  partitionKey: {
+    name: "id",
+    type: dynamodb.AttributeType.STRING,
+  },
+});
+
+const demoDS = api.addDynamoDbDataSource("demoDataSource", demoTable);
+
+demoDS.createResolver("QueryGetDemosResolver", {
+  typeName: "Query",
+  fieldName: "getDemos",
+  requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
+  responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
+});
+
+demoDS.createResolver("MutationAddDemoResolver", {
+  typeName: "Mutation",
+  fieldName: "addDemo",
+  requestMappingTemplate: appsync.MappingTemplate.dynamoDbPutItem(
+    appsync.PrimaryKey.partition("id").auto(),
+    appsync.Values.projecting("input")
+  ),
+  responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem(),
+});
+
+demoDS.createResolver("QueryGetDemosConsistentResolver", {
+  typeName: "Query",
+  fieldName: "getDemosConsistent",
+  requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(true),
+  responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
 });
