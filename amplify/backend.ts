@@ -1,4 +1,4 @@
-import { defineBackend } from "@aws-amplify/backend";
+import { defineBackend, defineFunction } from "@aws-amplify/backend";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import * as appsync from "aws-cdk-lib/aws-appsync";
@@ -62,4 +62,13 @@ demoDS.createResolver("QueryGetDemosConsistentResolver", {
   fieldName: "getDemosConsistent",
   requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(true),
   responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
+});
+
+demoDS.createResolver("EchoQueryResolver", {
+  typeName: "Query",
+  fieldName: "echo",
+  runtime: appsync.FunctionRuntime.JS_1_0_0,
+  code: appsync.Code.fromAsset(
+    path.join(__dirname, "data/resolvers/myFunction.js")
+  ),
 });
